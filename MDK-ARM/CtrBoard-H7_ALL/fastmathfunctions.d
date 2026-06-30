@@ -1,0 +1,29 @@
+ctrboard-h7_all/fastmathfunctions.o: \
+  ..\CMSIS\DSP\Src\FastMathFunctions\FastMathFunctions.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_cos_f32.c \
+  ..\CMSIS\DSP\Inc\dsp\fast_math_functions.h \
+  ..\CMSIS\DSP\Inc\arm_math_types.h \
+  ..\Drivers\CMSIS\Include\cmsis_compiler.h \
+  ..\Drivers\CMSIS\Include\cmsis_armclang.h \
+  ..\CMSIS\DSP\Inc\arm_math_memory.h ..\CMSIS\DSP\Inc\dsp\none.h \
+  ..\CMSIS\DSP\Inc\dsp\utils.h \
+  ..\CMSIS\DSP\Inc\dsp\basic_math_functions.h \
+  ..\CMSIS\DSP\Inc\arm_common_tables.h \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_cos_q15.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_cos_q31.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_sin_f32.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_sin_q15.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_sin_q31.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_sqrt_q31.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_sqrt_q15.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_vexp_f32.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_vexp_f64.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_vlog_f32.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_vlog_f64.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_divide_q15.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_divide_q31.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_vlog_q31.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_vlog_q15.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_atan2_f32.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_atan2_q31.c \
+  ..\CMSIS\DSP\Src\FastMathFunctions\arm_atan2_q15.c
