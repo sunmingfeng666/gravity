@@ -310,6 +310,7 @@ static void j2id_send_axis_mit(uint8_t axis)
         return;
     }
 
+    /* 本函数是单轴 MIT 发送入口：先写目标，再把前馈、重力补偿、阻抗等力矩叠加后发出。 */
     motor->MIT.position_des = J2ID_TargetRad[axis];
     motor->MIT.velocity_des = 0.0f;
     if (axis == J2ID_AXIS_J4) {
@@ -317,6 +318,7 @@ static void j2id_send_axis_mit(uint8_t axis)
         J2ID_Kd[J2ID_AXIS_J4] = J4ID_Kd;
     }
     ArmCtrl_SelectMitGains(axis, J2ID_Kp[axis], J2ID_Kd[axis], &motor->MIT.Kp, &motor->MIT.Kd);
+    /* 当前阻抗 / 外部 PID 采用 STM32 外部计算力矩，所以关闭电机内部 MIT 的 Kp/Kd。 */
     if (J2ID_AxisMode[axis] == ARM_CTRL_MODE_IMPEDANCE ||
         J2ID_AxisMode[axis] == ARM_CTRL_MODE_IMP_ADMITTANCE ||
         J2ID_AxisMode[axis] == ARM_CTRL_MODE_EXT_PID ||
@@ -324,16 +326,20 @@ static void j2id_send_axis_mit(uint8_t axis)
         motor->MIT.Kp = 0.0f;
         motor->MIT.Kd = 0.0f;
     }
+    /* torque_des 先放手动前馈，再逐项叠加重力补偿、阻抗控制和外部 PID 输出。 */
     motor->MIT.torque_des = J2ID_Tff[axis];
+    /* 用当前 J2/J4/J5 实际角度计算该轴需要抵消的重力矩。 */
     J2ID_DebugAxisGcTau[axis] = ArmCtrl_CalcGravityTau(axis,
                                                        Motors.DM_8009_J2.DATA.pos,
                                                        Motors.DM_4340_J4.DATA.pos,
                                                        Motors.DM_4310_J5.DATA.pos);
     motor->MIT.torque_des += J2ID_DebugAxisGcTau[axis];
+    /* 关节阻抗力矩：Kp*(目标位置-实际位置)-Kd*实际速度。 */
     motor->MIT.torque_des += ArmCtrl_CalcImpedanceTau(axis,
                                                       J2ID_TargetRad[axis],
                                                       motor->DATA.pos,
                                                       motor->DATA.vel);
+    /* 外部 PID 模式可选；非 PID 模式下该函数返回 0。 */
     motor->MIT.torque_des += ArmCtrl_CalcExtPidTau(axis,
                                                    ((float)J2ID_TaskPeriodMs) * 0.001f,
                                                    J2ID_TargetRad[axis],
@@ -429,6 +435,7 @@ void J2_Identify_TaskStep(void)
         float axis_tor[6];
         float gravity_tau[6];
 
+        /* 导纳控制需要估算外力矩：先缓存各轴反馈，并提前计算重力补偿力矩用于扣除重力影响。 */
         for (axis = 0U; axis < 6U; axis++) {
             DM_MOTOR_Typdef *motor = j2id_get_motor(axis);
             axis_pos[axis] = motor->DATA.pos;
@@ -439,6 +446,7 @@ void J2_Identify_TaskStep(void)
                                                        Motors.DM_4340_J4.DATA.pos,
                                                        Motors.DM_4310_J5.DATA.pos);
         }
+        /* 导纳开启时会根据外力矩修正 J2ID_TargetRad；关闭时函数内部会复位导纳状态。 */
         ArmCtrl_AdmittanceStep(dt, (float *)J2ID_TargetRad, axis_pos, axis_vel, axis_tor, gravity_tau);
         if (J2ID_TargetSource == 0U) {
             j2id_set_axis_target_to_control3(J2ID_AXIS_J2, J2ID_TargetRad[J2ID_AXIS_J2]);

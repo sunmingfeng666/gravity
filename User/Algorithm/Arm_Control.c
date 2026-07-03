@@ -103,6 +103,7 @@ static float armctrl_deadband(float value, float deadband)
 
 static float armctrl_calc_j2_gravity_tau(float q2, float q4)
 {
+    /* J2 重力补偿：用 q2 和 q2+q4 的三角函数拟合后级连杆对 J2 的重力矩。 */
     if (J2ID_GcRangeLimitEnable != 0U &&
         (q2 < J2ID_GcMinRad || q2 > J2ID_GcMaxRad)) {
         return 0.0f;
@@ -117,6 +118,7 @@ static float armctrl_calc_j2_gravity_tau(float q2, float q4)
 
 static float armctrl_calc_j4_gravity_tau(float q2, float q4)
 {
+    /* J4 重力补偿：同时考虑 J2 姿态、J4 自身姿态以及 q2+q4 的耦合影响。 */
     if (J2ID_GcRangeLimitEnable != 0U &&
         (q4 < J4ID_GcMinRad || q4 > J4ID_GcMaxRad)) {
         return 0.0f;
@@ -133,6 +135,7 @@ static float armctrl_calc_j4_gravity_tau(float q2, float q4)
 
 static float armctrl_calc_j5_gravity_tau(float q4, float q5)
 {
+    /* J5 重力补偿：由腕部 q5 和 q4+q5 的姿态耦合项拟合输出力矩。 */
     if (J2ID_GcRangeLimitEnable != 0U &&
         (q5 < J5ID_GcMinRad || q5 > J5ID_GcMaxRad)) {
         return 0.0f;
@@ -151,6 +154,7 @@ void ArmCtrl_SelectMitGains(uint8_t axis,
                             float *kp,
                             float *kd)
 {
+    /* 根据轴模式选择 MIT 增益；外部力矩阻抗模式会在发送前再把 MIT Kp/Kd 清零。 */
     /* 阻抗模式只覆盖 J2/J4/J5；模式3导纳不使用阻抗增益。 */
     if (J2ID_ImpedanceEnable != 0U &&
         (ArmCtrl_Debug.axis_mode[axis] == ARM_CTRL_MODE_IMPEDANCE ||
@@ -171,6 +175,7 @@ void ArmCtrl_SelectMitGains(uint8_t axis,
 
 float ArmCtrl_CalcGravityTau(uint8_t axis, float q2, float q4, float q5)
 {
+    /* 统一重力补偿入口：只有模式大于等于 GRAVITY 的轴才输出补偿力矩。 */
     /* 统一重力补偿入口，同时用于前馈和导纳外力估计。 */
     if (ArmCtrl_Debug.axis_mode[axis] < ARM_CTRL_MODE_GRAVITY) {
         return 0.0f;
@@ -193,6 +198,7 @@ float ArmCtrl_CalcImpedanceTau(uint8_t axis, float target, float pos, float vel)
     float kp;
     float kd;
 
+    /* 关节阻抗只在 IMPEDANCE / IMP_ADMITTANCE 模式下生效，其他模式不额外输出力矩。 */
     if (axis >= ARM_CTRL_AXIS_COUNT ||
         (ArmCtrl_Debug.axis_mode[axis] != ARM_CTRL_MODE_IMPEDANCE &&
          ArmCtrl_Debug.axis_mode[axis] != ARM_CTRL_MODE_IMP_ADMITTANCE)) {
@@ -207,6 +213,7 @@ float ArmCtrl_CalcImpedanceTau(uint8_t axis, float target, float pos, float vel)
         kd = J2ID_ImpKd[axis];
     }
 
+    /* 虚拟弹簧阻尼模型：位置误差产生回拉力矩，速度项提供阻尼抑制振荡。 */
     return kp * (target - pos) - kd * vel;
 }
 

@@ -74,6 +74,7 @@ int8_t mit_ctrl(hcan_t* hcan, uint16_t motor_id, DM_MOTOR_MIT_Typdef *MITS)
   kd_tmp  = float_to_uint(MITS->Kd,   KD_MIN, KD_MAX, 12);
   tor_tmp = float_to_uint(MITS->torque_des, T_MIN,  T_MAX,  12);
 
+  /* MIT 控制帧打包：前面计算出的 torque_des 会被压缩到 tor_tmp，并放入 data[6]/data[7]。 */
   data[0] = (pos_tmp >> 8);
   data[1] = pos_tmp;
   data[2] = (vel_tmp >> 4);
