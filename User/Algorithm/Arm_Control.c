@@ -1,7 +1,7 @@
 #include "Arm_Control.h"
 #include <math.h>
 
-/* Keil Watch 里只添加 ArmCtrl_Debug，就能调所有控制参数。 */
+
 volatile ArmCtrl_Debug_t ArmCtrl_Debug = {
     .axis_mode = {
         ARM_CTRL_MODE_NORMAL,
@@ -13,7 +13,7 @@ volatile ArmCtrl_Debug_t ArmCtrl_Debug = {
     },
     .gc_range_limit_enable = 0,
     .impedance_enable = 1,
-    /* MIT 模式使用的柔顺关节阻抗增益，下标 0=J1，1=J2，依次类推。 */
+    /* MIT 模式使用的柔顺关节阻抗增益 */
     .imp_kp = {0.0f, 12.0f, 3.0f, 0.0f, 5.0f, 2.0f},
     .imp_kd = {0.0f, 4.0f, 0.15f, 0.0f, 0.18f, 0.10f},
     .j4_imp_kp = 6.0f,
